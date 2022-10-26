@@ -20,3 +20,10 @@ def callProcSafe(procName, args=None):
   cursor.close()
 
   return res
+
+# helper function for checking if all required fields are present
+def params_missing(params):
+  for param in params:
+    if not param:
+      return True
+  return False
