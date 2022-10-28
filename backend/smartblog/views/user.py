@@ -98,6 +98,8 @@ def createUser(user):
 
   id = uuid.uuid4().hex
   query = f'INSERT INTO user (iduser, email, password, first_name, last_name) VALUES ("{id}", "{user["email"]}", "{user["password"]}", "{user["first_name"]}", "{user["last_name"]}")'
+
+  # need to handle email already taken
   cursor.execute(query)
   connection.commit()
 
