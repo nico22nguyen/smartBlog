@@ -3,6 +3,7 @@ from json import loads
 from MySQLdb import connect
 from dotenv import load_dotenv
 
+# nic was here!!!
 load_dotenv()
 connection = connect("localhost", getenv('DB_USER'), getenv('DB_PASS'), getenv('DB_NAME'))
 
