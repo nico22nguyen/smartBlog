@@ -122,60 +122,6 @@ def getBlogsWithConstraints(user_id, title, cgeq, cleq):
   cursor.close()
   return HttpResponse(dumps({ 'data': blogs }), content_type='application/json')
 
-def getBlogsByUserId(user_id):
-  cursor = connection.cursor()
-
-  cursor.execute('SELECT * FROM blog WHERE user_id = %s', [user_id])
-  result = cursor.fetchall()
-
-  blogs = getBlogsFromQueryResult(result)
-
-  cursor.close()
-  return HttpResponse(dumps({ 'data': blogs }), content_type='application/json')
-
-def getBlogsByTitle(title):
-  cursor = connection.cursor()
-
-  cursor.execute('SELECT * FROM blog WHERE title = %s', [title])
-
-  result = cursor.fetchall()
-
-  if cursor.rowcount == 0:
-    response = HttpResponse('No blog with title "' + title + "'")
-    response.status_code = 404
-
-    return response
-  
-  blogs = getBlogsFromQueryResult(result)
-
-  cursor.close()
-  return HttpResponse(dumps({ 'data': blogs }), content_type='application/json')
-
-def getBlogsConstrainRating(cgeq=None, cleq=None):
-  # make sure constraints are valid
-  if (not params_missing([cleq, cgeq]) and cgeq > cleq):
-    response = HttpResponse('cgeq must be less than or equal to cleq')
-    response.status_code = 400
-
-    return response
-  
-  # build query from params, could be one or both
-  query = 'SELECT * FROM blog WHERE'
-  if cgeq:
-    query += f' rating >= {cgeq}'
-  if cgeq and cleq:
-    query += ' AND'
-  if cleq:
-    query += f' rating <= {cleq}'
-  cursor = connection.cursor()
-
-  cursor.execute(query)
-  result = cursor.fetchall()
-  blogs = getBlogsFromQueryResult(result)
-
-  cursor.close()
-  return HttpResponse(dumps({ 'data': blogs }), content_type='application/json')
-
 # handle error for no such user, myql will throw one
 def createBlog(blog):
   cursor = connection.cursor()
@@ -199,6 +145,7 @@ def createBlog(blog):
   }
 
   return HttpResponse(dumps(response), content_type='application/json')
+
 # helper function to get blogs from query result
 def getBlogsFromQueryResult(result):
   blogs = []
