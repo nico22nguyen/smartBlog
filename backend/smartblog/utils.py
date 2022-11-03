@@ -2,6 +2,7 @@ from os import getenv
 from json import loads
 from MySQLdb import connect
 from dotenv import load_dotenv
+from hashlib import sha256
 
 # nic was here!!!
 load_dotenv()
@@ -28,3 +29,13 @@ def params_missing(params):
     if not param:
       return True
   return False
+
+# takes in string and returns sha256 hash of string
+def getHashedString(input):
+  # create hash object and feed it the input string
+  hash_object = sha256()
+  buffer = input.encode('utf-8')
+  hash_object.update(buffer)
+
+  # read the hash state
+  return hash_object.hexdigest()
