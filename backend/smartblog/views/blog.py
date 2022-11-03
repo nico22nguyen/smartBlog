@@ -1,104 +1,215 @@
+import uuid
 from json import dumps
 
 from django.http import HttpResponse
-from ..utils import getBody
+from ..utils import getBody, params_missing, connection
 
 def handler(request):
-  pass
+  if request.method == 'GET':
+    blog_id = request.GET.get('bid', None)
+    user_id = request.GET.get('uid', None)
+    title = request.GET.get('title', None)
+    cgeq = request.GET.get('cgeq', None)
+    cleq = request.GET.get('cleq', None)
 
-def getInventories(request, clientId):
-  if request.method != 'GET':
-    response = HttpResponse('Expected GET request')
+    if (blog_id):
+      return getBlogById(blog_id)
+    elif (user_id or title or cleq or cgeq):
+      if cgeq:
+        cgeq=int(cgeq)
+      if cleq:
+        cleq=int(cleq)
+      return getBlogsWithConstraints(user_id=user_id, title=title, cgeq=cgeq, cleq=cleq)
+    else:
+      return getAllBlogs()
+  elif request.method == 'POST':
+    blog = None
+    # get user obj from request body
+    try:
+      body = getBody(request)
+      blog = body['blog']
+    except:
+      response = HttpResponse('Expected blog in request body')
+      response.status_code = 400
+
+      return response
+    return createBlog(blog)
+  else:
+    response = HttpResponse('This request type is unsupported: ' + request.method)
     response.status_code = 405
 
     return response
 
-  maxInventories = request.GET.get('max', None)
+def getAllBlogs():
+  cursor = connection.cursor()
 
-  # get maxInventories inventories from database
-  # ------
-  # ------
+  cursor.execute('SELECT * FROM blog')
+  result = cursor.fetchall()
+  blogs = getBlogsFromQueryResult(result)
 
-  resp_body = {
-    'inventories': [ """ list of inventories """]
+  cursor.close()
+  return HttpResponse(dumps({ 'data': blogs }), content_type='application/json')
+
+def getBlogById(blog_id):
+  cursor = connection.cursor()
+
+  cursor.execute('SELECT * FROM blog WHERE idblog = %s', [blog_id])
+
+  result = cursor.fetchone()
+
+  if cursor.rowcount == 0:
+    response = HttpResponse('No blog with id ' + blog_id)
+    response.status_code = 404
+
+    return response
+  
+  (idblog, user_id, title, content, created_at, rating) = result
+
+  blog = {
+    'idblog': idblog,
+    'user_id': user_id,
+    'title': title,
+    'content': content,
+    'created_at': str(created_at),
+    'rating': rating
   }
 
-  return HttpResponse(dumps(resp_body), content_type='application/json')
+  cursor.close()
+  return HttpResponse(dumps({ 'data': blog }), content_type='application/json')
 
-def getInventoryById(request, clientId, inventoryId):
-  if request.method != 'GET':
-    response = HttpResponse('Expected GET request')
-    response.status_code = 405
+def getBlogsWithConstraints(user_id, title, cgeq, cleq):
+  # make sure constraints are valid
+  if (not params_missing([cleq, cgeq]) and cgeq > cleq):
+    response = HttpResponse('cgeq must be less than or equal to cleq')
+    response.status_code = 400
+
+    return response
+  
+  # count constraints (for query building)
+  numConstraints = 0
+  for constraint in [user_id, title, cgeq, cleq]:
+    if constraint:
+      numConstraints += 1
+  
+  # quick helper for repeated code
+  def add_AND_if_needed():
+    nonlocal numConstraints
+    nonlocal query
+    numConstraints -= 1
+    if numConstraints > 0:
+      query += ' AND'
+
+  # build query from params, add ANDs where necessary
+  query = 'SELECT * FROM blog WHERE'
+  if user_id:
+    query += f' user_id = "{user_id}"'
+    add_AND_if_needed()
+  if title:
+    query += f' title = "{title}"'
+    add_AND_if_needed()
+  if cgeq:
+    query += f' rating >= {cgeq}'
+    add_AND_if_needed()
+  if cleq:
+    query += f' rating <= {cleq}'
+
+  print(query)
+  cursor = connection.cursor()
+  cursor.execute(query)
+  result = cursor.fetchall()
+  blogs = getBlogsFromQueryResult(result)
+
+  cursor.close()
+  return HttpResponse(dumps({ 'data': blogs }), content_type='application/json')
+
+def getBlogsByUserId(user_id):
+  cursor = connection.cursor()
+
+  cursor.execute('SELECT * FROM blog WHERE user_id = %s', [user_id])
+  result = cursor.fetchall()
+
+  blogs = getBlogsFromQueryResult(result)
+
+  cursor.close()
+  return HttpResponse(dumps({ 'data': blogs }), content_type='application/json')
+
+def getBlogsByTitle(title):
+  cursor = connection.cursor()
+
+  cursor.execute('SELECT * FROM blog WHERE title = %s', [title])
+
+  result = cursor.fetchall()
+
+  if cursor.rowcount == 0:
+    response = HttpResponse('No blog with title "' + title + "'")
+    response.status_code = 404
+
+    return response
+  
+  blogs = getBlogsFromQueryResult(result)
+
+  cursor.close()
+  return HttpResponse(dumps({ 'data': blogs }), content_type='application/json')
+
+def getBlogsConstrainRating(cgeq=None, cleq=None):
+  # make sure constraints are valid
+  if (not params_missing([cleq, cgeq]) and cgeq > cleq):
+    response = HttpResponse('cgeq must be less than or equal to cleq')
+    response.status_code = 400
+
+    return response
+  
+  # build query from params, could be one or both
+  query = 'SELECT * FROM blog WHERE'
+  if cgeq:
+    query += f' rating >= {cgeq}'
+  if cgeq and cleq:
+    query += ' AND'
+  if cleq:
+    query += f' rating <= {cleq}'
+  cursor = connection.cursor()
+
+  cursor.execute(query)
+  result = cursor.fetchall()
+  blogs = getBlogsFromQueryResult(result)
+
+  cursor.close()
+  return HttpResponse(dumps({ 'data': blogs }), content_type='application/json')
+
+# handle error for no such user, myql will throw one
+def createBlog(blog):
+  cursor = connection.cursor()
+
+  if params_missing([blog['user_id'], blog['title'], blog['content'], blog['created_at'], blog['rating']]):
+    response = HttpResponse('User object incomplete: expected email, password, first_name, and last_name')
+    response.status_code = 400
 
     return response
 
-  # get inventory by id from database
-  # ------
-  # ------
+  id = uuid.uuid4().hex
+  query = f'INSERT INTO blog (idblog, user_id, title, content, created_at, rating) VALUES ("{id}", "{blog["user_id"]}", "{blog["title"]}", "{blog["content"]}", "{blog["created_at"]}", "{blog["rating"]}")'
 
-  resp_body = {
-    'inventory': ""# inventory from db 
+  # need to handle email already taken
+  cursor.execute(query)
+  connection.commit()
+
+  cursor.close()
+  response = {
+    'data': {'id': id }
   }
 
-  return HttpResponse(dumps(resp_body), content_type='application/json')
+  return HttpResponse(dumps(response), content_type='application/json')
+# helper function to get blogs from query result
+def getBlogsFromQueryResult(result):
+  blogs = []
+  for (idblog, user_id, title, content, created_at, rating)in result:
+    blogs.append({
+    'idblog': idblog,
+    'user_id': user_id,
+    'title': title,
+    'content': content,
+    'created_at': str(created_at),
+    'rating': rating
+  })
 
-def createInventory(request, clientId):
-  if request.method != 'POST':
-    response = HttpResponse('Expected POST request')
-    response.status_code = 405
-
-    return response
-
-  body = getBody(request)
-  inventory = body['inventory']
-
-  # create inventory in database
-  # ------
-  # ------
-
-  resp_body = {
-    'inventory': inventory
-  }
-
-  return HttpResponse(dumps(resp_body), content_type='application/json')
-
-def removeInventory(request, clientId):
-  if request.method != 'POST':
-    response = HttpResponse('Expected POST request')
-    response.status_code = 405
-
-    return response
-
-  body = getBody(request)
-  inventoryId = body['inventoryId']
-
-  # remove inventory in database
-  # ------
-  # ------
-
-  resp_body = {
-    'inventory': inventoryId
-  }
-
-  return HttpResponse(dumps(resp_body), content_type='application/json')
-
-def updateInventory(request, clientId):
-  if request.method != 'POST':
-    response = HttpResponse('Expected POST request')
-    response.status_code = 405
-
-    return response
-
-  body = getBody(request)
-  inventoryId = body['inventoryId']
-  inventoryInfo = body['inventory']
-
-  # update inventory in database
-  # ------
-  # ------
-
-  resp_body = {
-    'inventory': inventoryId
-  }
-
-  return HttpResponse(dumps(resp_body), content_type='application/json')
+  return blogs
