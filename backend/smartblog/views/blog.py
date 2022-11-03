@@ -202,7 +202,7 @@ def createBlog(blog):
 # helper function to get blogs from query result
 def getBlogsFromQueryResult(result):
   blogs = []
-  for (idblog, user_id, title, content, created_at, rating)in result:
+  for (idblog, user_id, title, content, created_at, rating) in result:
     blogs.append({
     'idblog': idblog,
     'user_id': user_id,
