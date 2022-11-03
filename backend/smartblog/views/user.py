@@ -1,7 +1,7 @@
 from json import dumps
 
 from django.http import HttpResponse
-from ..utils import getBody, params_missing, connection
+from ..utils import getBody, params_missing, connection, getHashedString
 
 import uuid
 
@@ -96,8 +96,11 @@ def createUser(user):
 
     return response
 
+  # generate id and hash password
   id = uuid.uuid4().hex
-  query = f'INSERT INTO user (iduser, email, password, first_name, last_name) VALUES ("{id}", "{user["email"]}", "{user["password"]}", "{user["first_name"]}", "{user["last_name"]}")'
+  hashed_pass = getHashedString(user['password'])
+
+  query = f'INSERT INTO user (iduser, email, password, first_name, last_name) VALUES ("{id}", "{user["email"]}", "{hashed_pass}", "{user["first_name"]}", "{user["last_name"]}")'
 
   # need to handle email already taken
   cursor.execute(query)
