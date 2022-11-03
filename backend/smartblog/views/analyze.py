@@ -1,104 +1,41 @@
 from json import dumps
 
 from django.http import HttpResponse
-from ..utils import getBody
+from ..utils import getBody, params_missing
 
 def handler(request):
-  pass
-
-def getLogs(request):
-  if request.method != 'GET':
-    response = HttpResponse('Expected GET request')
+  if request.method != 'POST':
+    response = HttpResponse('Must POST to login route')
     response.status_code = 405
 
     return response
 
-  maxLogs = request.GET.get('max', None)
+  body = getBody(request)
+  content = body['content']
 
-  # get maxLogs logs from database
-  # ------
-  # ------
-
-  resp_body = {
-    'logs': [ """ list of logs """]
-  }
-
-  return HttpResponse(dumps(resp_body), content_type='application/json')
-
-def getClientLogs(request, clientId):
-  if request.method != 'GET':
-    response = HttpResponse('Expected GET request')
-    response.status_code = 405
+  # ensure email and password are provided
+  if params_missing([content]):
+    response = HttpResponse('Expected content in request body')
+    response.status_code = 400
 
     return response
-
-  maxLogs = request.GET.get('max', None)
-
-  # get maxLogs logs from database
-  # ------
-  # ------
-
-  resp_body = {
-    'logs': [ """ list of logs """]
-  }
-
-  return HttpResponse(dumps(resp_body), content_type='application/json')
-
-def getContactLogs(request, clientId, contactId):
-  if request.method != 'GET':
-    response = HttpResponse('Expected GET request')
-    response.status_code = 405
-
-    return response
-
-  maxLogs = request.GET.get('max', None)
-
-  # get maxLogs logs from database
-  # ------
-  # ------
-
-  resp_body = {
-    'logs': [ """ list of logs """]
-  }
-
-  return HttpResponse(dumps(resp_body), content_type='application/json')
-
-def getInventoryLogs(request, clientId, inventoryId):
-  if request.method != 'GET':
-    response = HttpResponse('Expected GET request')
-    response.status_code = 405
-
-    return response
-
-  maxLogs = request.GET.get('max', None)
-
-  # get maxLogs logs from database
-  # ------
-  # ------
-
-  resp_body = {
-    'logs': [ """ list of logs """]
-  }
-
-  return HttpResponse(dumps(resp_body), content_type='application/json')
-
-def getResourceLogs(request, clientId, inventoryId, resourceId):
-  if request.method != 'GET':
-    response = HttpResponse('Expected GET request')
-    response.status_code = 405
-
-    return response
-
-  maxLogs = request.GET.get('max', None)
   
-  print(clientId, inventoryId, resourceId)
+  twitter_analysis = analyze_twitter(content)
+  instagram_analysis = analyze_instagram(content)
+  average = (twitter_analysis + instagram_analysis) / 2
 
-  # get maxLogs logs from database
-  # ------
-  # ------
-
-  resp_body = {
-    'logs': [ """ list of logs """]
+  response = {
+    'data': {
+      'twitter_analysis': twitter_analysis,
+      'instagram_analysis': instagram_analysis,
+      'average_analysis': average
+    }
   }
 
-  return HttpResponse(dumps(resp_body), content_type='application/json')
+  return HttpResponse(dumps(response), content_type='application/json')
+
+def analyze_twitter(body):
+  return 50
+
+def analyze_instagram(body):
+  return 75
