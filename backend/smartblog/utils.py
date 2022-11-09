@@ -39,3 +39,6 @@ def getHashedString(input):
 
   # read the hash state
   return hash_object.hexdigest()
+
+def remove_escape_chars(string: str):
+  return string.replace('\n', ' ').replace('\r', ' ').replace('\xa0', ' ')
