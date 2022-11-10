@@ -49,14 +49,10 @@ def handler(request):
   print(tweets)
   twitter_analyses = [get_text_analysis(tweet) for tweet in tweets]
   print(twitter_analyses)
-
-  twitter_score = get_controversy_from_analyses(twitter_analyses)
+  controversy_rating = get_controversy_from_analyses(twitter_analyses)
+  print(controversy_rating)
   response = {
-    'data': {
-      'twitter_analysis': twitter_score,
-      'instagram_analysis': 'Not implemented',
-      'average_analysis': 'Not implemented',
-    }
+    'data': {'controversy_rating': controversy_rating}
   }
   return HttpResponse(dumps(response), content_type='application/json')
 
