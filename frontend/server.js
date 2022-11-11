@@ -10,7 +10,7 @@ const redirectToFeed = (req, res) => {
 }
 
 const serveFeed = (req, res) => {
-  fs.readFile(__dirname + "/feed.html")
+  fs.readFile(__dirname + "/pages/feed.html")
     .then(contents => {
       res.writeHead(200);
       res.end(contents);
@@ -18,7 +18,7 @@ const serveFeed = (req, res) => {
 }
 
 const serveRegister = (req, res) => {
-  fs.readFile(__dirname + "/register.html")
+  fs.readFile(__dirname + "/pages/register.html")
     .then(contents => {
       res.writeHead(200);
       res.end(contents);
@@ -26,7 +26,7 @@ const serveRegister = (req, res) => {
 }
 
 const serveLogin = (req, res) => {
-  fs.readFile(__dirname + "/login.html")
+  fs.readFile(__dirname + "/pages/login.html")
     .then(contents => {
       res.writeHead(200);
       res.end(contents);
