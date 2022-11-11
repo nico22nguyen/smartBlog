@@ -16,7 +16,6 @@
         }
 
         const login = (e) => {
-            e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             if (!email || !password) {
@@ -31,7 +30,7 @@
                 body: JSON.stringify(payload),
             })
                 .then(res => {
-                    if (res.ok) window.location = '/feed'
+                    if (res.ok) return
                     else if (res.status === 401) return alert('Incorrect Password')
                     else if (res.status === 404) return alert(`An account is not registered under email: ${email}`)
                     else res.text().then(text => console.error(text))
@@ -45,7 +44,7 @@
 
 <div class="content">
     <h2>Smart Blog Login</h2>
-  <form id="form" method="post">
+  <form id="form" method="post" action='feed'>
        <div class="inputbox">
           <span>Email</span>
           <input type="text" id="email" required>
