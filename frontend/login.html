@@ -11,27 +11,33 @@
         const PORT = 8000
 
         window.onload = () => {
-        document.getElementById('form')
-          .addEventListener('submit', register);
-      }
+            document.getElementById('form')
+            .addEventListener('submit', login);
+        }
 
         const login = (e) => {
-        e.preventDefault();
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const payload = { email, password }
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            if (!email || !password) {
+                console.log('Email and password are required');
+            }
+            const payload = { email, password }
+            console.log(payload)
 
-        return fetch(`http://localhost:${PORT}/api/auth`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-        })
-            .then(res => {
-            if (res.ok) window.location = '/feed'
-            else res.text().then(text => console.error(text))
+            return fetch(`http://localhost:${PORT}/api/auth`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
             })
-            .catch(error => console.error(error));
-        }
+                .then(res => {
+                    if (res.ok) window.location = '/feed'
+                    else if (res.status === 401) return alert('Incorrect Password')
+                    else if (res.status === 404) return alert(`An account is not registered under email: ${email}`)
+                    else res.text().then(text => console.error(text))
+                })
+                .catch(error => console.error(error));
+            }
     </script>
 </head>
 <body>  
@@ -39,20 +45,20 @@
 
 <div class="content">
     <h2>Smart Blog Login</h2>
-  <form id="form">
-       <div class="inputbox" id="email">
+  <form id="form" method="post">
+       <div class="inputbox">
           <span>Email</span>
-          <input type="text">
+          <input type="text" id="email" required>
        </div>
-       <div class="inputbox" id="password">                 
+       <div class="inputbox">                 
         <span>Password</span>                  
-        <input type="password">
+        <input type="password" id="password" required>
       </div>
       <div class="inputbox">
-         <input type="submit" value="login">
+         <input type="submit" value="Login">
       </div>
   </form>
-  <p>Do not have an account?&nbsp;&nbsp;<a href="">Sign up</a></p>
+  <p>Don't have an account?&nbsp;<a href="/register">Sign up</a></p>
   <link
       rel="stylesheet"
       href="https://use.fontawesome.com/releases/v5.15.3/css/all.css"
