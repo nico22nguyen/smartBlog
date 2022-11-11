@@ -4,16 +4,17 @@ const fs = require('fs').promises;
 const HOST = 'localhost'
 const PORT = 3000
 
+const redirectToFeed = (req, res) => {
+  res.writeHead(302, { 'Location': '/feed' });
+  res.end();
+}
+
 const serveFeed = (req, res) => {
-  res.writeHead(200)
-  res.end('<html><body><h1>Feed</h1></body></html>')
-  /*
   fs.readFile(__dirname + "/feed.html")
     .then(contents => {
       res.writeHead(200);
       res.end(contents);
     })
-  */
 }
 
 const serveRegister = (req, res) => {
@@ -44,6 +45,8 @@ const router = (req, res) => {
   // handle routes
   switch (req.url) {
     case '/':
+      redirectToFeed(req, res);
+      break
     case '/feed':
       serveFeed(req, res)
       break
