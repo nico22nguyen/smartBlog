@@ -102,8 +102,14 @@ def createUser(user):
 
   query = f'INSERT INTO user (iduser, email, password, first_name, last_name) VALUES ("{id}", "{user["email"]}", "{hashed_pass}", "{user["first_name"]}", "{user["last_name"]}")'
 
-  # need to handle email already taken
-  cursor.execute(query)
+  try:
+    cursor.execute(query)
+  except Exception as e:
+    if (e.args[0] == 1062): # handle email taken
+      response = HttpResponse('Email taken')
+      response.status_code = 400
+
+      return response
   connection.commit()
 
   cursor.close()
