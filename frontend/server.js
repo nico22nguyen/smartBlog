@@ -3,6 +3,7 @@ const fs = require('fs').promises;
 
 const HOST = 'localhost'
 const PORT = 3000
+const PAGES_DIR = __dirname + '/pages'
 
 const redirectToFeed = (req, res) => {
   res.writeHead(302, { 'Location': '/feed' });
@@ -10,7 +11,7 @@ const redirectToFeed = (req, res) => {
 }
 
 const serveFeed = (req, res) => {
-  fs.readFile(__dirname + "/pages/feed.html")
+  fs.readFile(PAGES_DIR + "/feed.html")
     .then(contents => {
       res.writeHead(200);
       res.end(contents);
@@ -18,7 +19,7 @@ const serveFeed = (req, res) => {
 }
 
 const serveRegister = (req, res) => {
-  fs.readFile(__dirname + "/pages/register.html")
+  fs.readFile(PAGES_DIR + "/register.html")
     .then(contents => {
       res.writeHead(200);
       res.end(contents);
@@ -26,7 +27,7 @@ const serveRegister = (req, res) => {
 }
 
 const serveLogin = (req, res) => {
-  fs.readFile(__dirname + "/pages/login.html")
+  fs.readFile(PAGES_DIR + "/login.html")
     .then(contents => {
       res.writeHead(200);
       res.end(contents);
