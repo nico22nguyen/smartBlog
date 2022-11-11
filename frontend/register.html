@@ -19,7 +19,6 @@
             user: { email, password, first_name, last_name }
           };
 
-          console.log(payload)
           return fetch(`http://localhost:${PORT}/api/user`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -36,7 +35,7 @@
                 })
               }
             })
-            .catch(error => console.log(error));
+            .catch(error => console.error(error));
         };
       </script>
   </head>
