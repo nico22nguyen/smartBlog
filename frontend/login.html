@@ -7,18 +7,44 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <script>
+        const PORT = 8000
+
+        window.onload = () => {
+        document.getElementById('form')
+          .addEventListener('submit', register);
+      }
+
+        const login = (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const payload = { email, password }
+
+        return fetch(`http://localhost:${PORT}/api/auth`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        })
+            .then(res => {
+            if (res.ok) window.location = '/feed'
+            else res.text().then(text => console.error(text))
+            })
+            .catch(error => console.error(error));
+        }
+    </script>
 </head>
 <body>  
 <title>Document</title>
 
 <div class="content">
     <h2>Smart Blog Login</h2>
-  <form>
-       <div class="inputbox">
-          <span>Username</span>
+  <form id="form">
+       <div class="inputbox" id="email">
+          <span>Email</span>
           <input type="text">
        </div>
-       <div class="inputbox">                 
+       <div class="inputbox" id="password">                 
         <span>Password</span>                  
         <input type="password">
       </div>
