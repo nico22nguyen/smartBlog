@@ -10,6 +10,18 @@ const redirectToFeed = (req, res) => {
   res.end();
 }
 
+const serveStatic = (req, res) => {
+  fs.readFile(__dirname + req.url)
+    .then(contents => {
+      res.writeHead(200);
+      res.end(contents);
+    })
+    .catch(err => {
+      res.writeHead(404);
+      res.end(JSON.stringify(err))
+    })
+}
+
 const serveFeed = (req, res) => {
   fs.readFile(PAGES_DIR + "/feed.html")
     .then(contents => {
@@ -42,6 +54,11 @@ const serve404 = (req, res) => {
 const router = (req, res) => {
   // always return html
   res.setHeader("Content-Type", "text/html");
+
+  // handle requests for static files
+  if (req.url.length > 7 && req.url.substring(0, 7) === '/static') {
+    return serveStatic(req, res)
+  }
 
   // handle routes
   switch (req.url) {
