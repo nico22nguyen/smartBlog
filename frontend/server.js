@@ -46,6 +46,14 @@ const serveLogin = (req, res) => {
     })
 }
 
+const servePost = (req, res) => {
+  fs.readFile(PAGES_DIR + "/postblog.html")
+    .then(contents => {
+      res.writeHead(200);
+      res.end(contents);
+    })
+}
+
 const serve404 = (req, res) => {
   res.writeHead(404)
   res.end('<html><body><h1>404</h1></body></html>')
@@ -73,6 +81,9 @@ const router = (req, res) => {
       break
     case '/login':
       serveLogin(req, res)
+      break
+    case '/post':
+      servePost(req, res)
       break
     default:
       serve404(req, res)
