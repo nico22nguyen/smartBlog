@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "html-to-rtf": "^2.0.1",
     "http": "^0.0.1-security"
   }
 }
