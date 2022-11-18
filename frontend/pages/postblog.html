@@ -4,11 +4,48 @@
     <meta charset="UTF-8">
     <title>Draft Blog</title>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.9/css/all.css">
-    <link rel="stylesheet" href="style.css">
-    <script src="../function.js"></script>
+    <script>
+      function enableEditMode() {
+        richTextField.document.designMode = "on";
+      }
+      function Edit(command) {
+        richTextField.document.execCommand(command, false, null);
+      }
+      function execVal(command, value) {
+        richTextField.document.execCommand(command, false, value);
+      }
+    </script>
+    <style>
+      body {
+        background-color: whitesmoke;
+        margin-top: 100px;
+      }
+      div,iframe {
+        width: 65% !important;
+        margin: auto;
+        display: block;
+        border: 1px solid #ccc;
+      }
+      iframe{
+        height:600px !important;
+        background-color: white;
+      }
+      div {
+        border: none;
+        margin-bottom: 10px;
+      }
+      button,input,select {
+        margin:5px;
+      }
+      button {
+        color: white;
+        background-color: #FF4447;
+        cursor: pointer;
+      }
+    </style>
   </head>
- 
   <body onload="enableEditMode()">
+    <h1 style="display: flex; justify-content:center">Draft Blog</h1>
     <div>
       <div style="margin: 0px; margin-left: 1em; margin-bottom: 1em;">
         <label for="blogTitle">Title:</label>
