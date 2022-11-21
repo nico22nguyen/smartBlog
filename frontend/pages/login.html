@@ -1,139 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Smart Blog</title>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
-        * {
-            padding: 0;
-            margin: 0;
-            box-sizing: border-box;
-            font-family: "Lato", sans-serif;
-        }
-        * a {
-            text-decoration: none;
-        }
-        .main {
-            width: 100%;
-            position: relative;
-            display: flex;
-            height: 100vh;
-        }
-        .main .image {
-            position: relative;
-            width: 50%;
-            height: 100%;
-            background: #13c28ea6;
-        }
-        .main .image img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .content {
-            box-shadow: 2px 2px 5px 20px #13c28ea6;
-        }
-        .main .content {
-            display: flex;
-            flex-wrap: wrap;
-            flex-direction: column;
-            width: 50%;
-            height: 100%;
-            justify-content: center;
-            align-items: center;
-        }
-        .main .content form {
-            width: 50%;
-        }
-        .content h2 {
-            color: #607d8b;
-            font-weight: 600;
-            font-size: 1.6rem;
-            margin-bottom: 20px;
-            border-bottom: 4px solid #13c28def;
-            display: inline-block;
-            letter-spacing: 1px;
-        }
-        .content span {
-            font-size: 16px;
-            margin-bottom: 5px;
-            font-weight: bold;
-            display: inline-block;
-            color: #607d8b;
-        }
-        .content input[type="submit"] {
-            background: #13c28def;
-            color: #fff;
-            outline: none;
-            border: none;
-            font-weight: 500;
-            cursor: pointer;
-        }
-        .content input[type="submit"]:hover {
-            background: #05af7cfb;
-        }
+      * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+        font-family: 'Lato', sans-serif;
+      }
+      * a {
+        text-decoration: none;
+      }
+      .main {
+        width: 100%;
+        position: relative;
+        display: flex;
+        height: 100vh;
+      }
+      .main .image {
+        position: relative;
+        width: 50%;
+        height: 100%;
+        background: #13c28ea6;
+      }
+      .main .image img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .content {
+        box-shadow: 2px 2px 5px 20px #13c28ea6;
+      }
+      .main .content {
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: column;
+        width: 50%;
+        height: 100%;
+        justify-content: center;
+        align-items: center;
+      }
+      .main .content form {
+        width: 50%;
+      }
+      .content h2 {
+        color: #607d8b;
+        font-weight: 600;
+        font-size: 1.6rem;
+        margin-bottom: 20px;
+        border-bottom: 4px solid #13c28def;
+        display: inline-block;
+        letter-spacing: 1px;
+      }
+      .content span {
+        font-size: 16px;
+        margin-bottom: 5px;
+        font-weight: bold;
+        display: inline-block;
+        color: #607d8b;
+      }
+      .content input[type='submit'] {
+        background: #13c28def;
+        color: #fff;
+        outline: none;
+        border: none;
+        font-weight: 500;
+        cursor: pointer;
+      }
+      .content input[type='submit']:hover {
+        background: #05af7cfb;
+      }
     </style>
     <script>
-        const PORT = 8000
+      const PORT = 8000;
 
-        window.onload = () => {
-            document.getElementById('form')
-                .addEventListener('submit', login);
+      window.onload = () => {
+        if(!!localStorage.getItem('userId')) {
+          window.location.href = 'feed';
         }
+        document.getElementById('form').addEventListener('submit', login);
+      };
 
-        const login = (e) => {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            if (!email || !password) {
-                console.log('Email and password are required');
-            }
-            const payload = { email, password }
-            console.log(payload)
+      const login = e => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const payload = { email, password };
 
-            return fetch(`http://localhost:${PORT}/api/auth`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-            })
-                .then(res => {
-                    if (res.ok) return
-                    else if (res.status === 401) return alert('Incorrect Password')
-                    else if (res.status === 404) return alert(`An account is not registered under email: ${email}`)
-                    else res.text().then(text => console.error(text))
-                })
-                .catch(error => console.error(error));
-            }
+        return fetch(`http://localhost:${PORT}/api/auth`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+          .then(res => {
+            if (res.ok) return res.body.getReader().read();
+            else if (res.status === 401) alert('Incorrect Password');
+            else if (res.status === 404) alert(`An account is not registered under email: ${email}`);
+            else res.text().then(text => console.error(text));
+          })
+          .then(data => {
+            if (!data) return;
+            const bodyAsString = new TextDecoder('utf-8').decode(data.value);
+            const body = JSON.parse(bodyAsString);
+
+            const { userId } = body.data;
+            localStorage.setItem('userId', userId);
+            window.location.href = 'feed'
+          })
+          .catch(error => console.error(error));
+      };
     </script>
-</head>
-<body>  
-<title>Document</title>
+  </head>
+  <body>
+    <title>Document</title>
 
-<div class="content">
-    <h2>Smart Blog Login</h2>
-  <form id="form" method="post" action='feed'>
-       <div class="inputbox">
+    <div class="content">
+      <h2>Smart Blog Login</h2>
+      <form id="form" method="post">
+        <div class="inputbox">
           <span>Email</span>
-          <input type="text" id="email" required>
-       </div>
-       <div class="inputbox">                 
-        <span>Password</span>                  
-        <input type="password" id="password" required>
-      </div>
-      <div class="inputbox">
-         <input type="submit" value="Login">
-      </div>
-  </form>
-  <p>Don't have an account?&nbsp;<a href="/register">Sign up</a></p>
-  <link
-      rel="stylesheet"
-      href="https://use.fontawesome.com/releases/v5.15.3/css/all.css"
-      integrity="sha384-SZXxX4whJ79/gErwcOYf+zWLeJdY/qpuqC4cAa9rOGUstPomtqpuNWT9wdPEn2fk"
-      crossorigin="anonymous"/>
-
-        
+          <input type="text" id="email" required />
+        </div>
+        <div class="inputbox">
+          <span>Password</span>
+          <input type="password" id="password" required />
+        </div>
+        <div class="inputbox">
+          <input type="submit" value="Login" />
+        </div>
+      </form>
+      <p>Don't have an account?&nbsp;<a href="/register">Sign up</a></p>
+      <link
+        rel="stylesheet"
+        href="https://use.fontawesome.com/releases/v5.15.3/css/all.css"
+        integrity="sha384-SZXxX4whJ79/gErwcOYf+zWLeJdY/qpuqC4cAa9rOGUstPomtqpuNWT9wdPEn2fk"
+        crossorigin="anonymous"
+      />
+    </div>
+  </body>
+</html>
