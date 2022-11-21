@@ -10,6 +10,8 @@
       }
       
       const register = (e) => {
+        e.preventDefault();
+
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const first_name = document.getElementById('first_name').value;
@@ -24,7 +26,10 @@
           body: JSON.stringify(payload),
         })
           .then(res => {
-            if (res.ok) return
+            if (res.ok) {
+              window.location.href = 'feed';
+              return
+            }
 
             res.text().then(text => {
               console.error(text)
@@ -37,7 +42,7 @@
   </head>
   <body>
     <h1>Register</h1>
-    <form method="post" action='feed' id="form">
+    <form method="post" id="form">
       <label for="email">Email</label>
       <input type="email" name="email" id="email" required/>
       <label for="password">Password</label>
