@@ -64,7 +64,7 @@ const router = (req, res) => {
   res.setHeader("Content-Type", "text/html");
 
   // handle requests for static files
-  if (req.url.length > 7 && req.url.substring(0, 7) === '/static') {
+  if (req.url.startsWith('/static')) {
     return serveStatic(req, res)
   }
 
