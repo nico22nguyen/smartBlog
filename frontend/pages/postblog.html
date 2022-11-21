@@ -5,6 +5,30 @@
     <title>Draft Blog</title>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.9/css/all.css">
     <script>
+      const PORT = 8000
+      const postBlog = () => {
+        const title = document.getElementById('blogTitle').value;
+        const { innerHTML, innerText } = richTextField.document.body
+        console.log(innerHTML, innerText)
+        /*
+        fetch(`http://localhost:${PORT}/api/auth`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+          .then(res => {
+            if (res.ok) return
+            else if (res.status === 401) return alert('Incorrect Password')
+            else if (res.status === 404) return alert(`An account is not registered under email: ${email}`)
+            else res.text().then(text => console.error(text))
+          })
+        */
+      }
+      window.onload = () => {
+        enableEditMode()
+        document.getElementById('next-button')
+          .addEventListener('click', postBlog);
+      }
       function enableEditMode() {
         richTextField.document.designMode = "on";
       }
@@ -44,7 +68,7 @@
       }
     </style>
   </head>
-  <body onload="enableEditMode()">
+  <body>
     <h1 style="display: flex; justify-content:center">Draft Blog</h1>
     <div>
       <div style="margin: 0px; margin-left: 1em; margin-bottom: 1em;">
@@ -102,7 +126,7 @@
     </div>
     <iframe name="richTextField" style="width:80%;height: 80%;margin:auto;display: block;"></iframe>
     <div style="display: flex; justify-content: flex-end; margin-top: 1em;">
-      <button>
+      <button id="next-button">
         <img width='24px' height='24px' src ='../static/Right_Arrow_Red.webp'/>
       </button>
     </div>
