@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from json import dumps
 from ..utils import getBody, params_missing, connection, getHashedString
 
 def handler(request):
@@ -27,8 +28,8 @@ def handler(request):
     return response
 
   cursor = connection.cursor()
-  cursor.execute(f'SELECT password FROM user WHERE email = "{email}"')
-  result = cursor.fetchone()
+  cursor.execute(f'SELECT iduser, password FROM user WHERE email = "{email}"')
+  (id, correct_hash) = cursor.fetchone()
 
   # 404 if no user with provided email
   if cursor.rowcount == 0:
@@ -37,11 +38,10 @@ def handler(request):
 
     return response
   
-  correct_hash = result[0]
   attempt_hash = getHashedString(raw_password)
 
   if attempt_hash == correct_hash:
-    return HttpResponse('Login Successful')
+    return HttpResponse(dumps({ 'data': {'userId': id } }), content_type='application/json')
   else:
     response = HttpResponse('Incorrect Password')
     response.status_code = 401
