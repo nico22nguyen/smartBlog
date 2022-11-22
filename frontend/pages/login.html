@@ -81,11 +81,11 @@
     </style>
     <script>
       const PORT = 8000;
+      if(!!localStorage.getItem('userId')) {
+        window.location.href = 'feed';
+      }
 
       window.onload = () => {
-        if(!!localStorage.getItem('userId')) {
-          window.location.href = 'feed';
-        }
         document.getElementById('form').addEventListener('submit', login);
       };
 
