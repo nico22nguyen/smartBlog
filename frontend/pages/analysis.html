@@ -2,23 +2,82 @@
 <html>
 
 <head>
-	<title>
-		Blog Analysis
-	</title>
+	<title>Blog Analysis</title>
+  <script>
+    const PORT = 8000
+    const title = sessionStorage.getItem('blogTitle')
+    const content = sessionStorage.getItem('blogContent')
+    let rating
+    
+    if (!title || !content) window.location.href = 'post'
+
+    const setup = () => {
+      document.getElementById('blog-title').innerText = title
+      richTextField.document.body.innerHTML = content
+      document.getElementById('post-button')
+        .addEventListener('click', postBlog);
+    }
+
+    const getRating = () => {
+      const text = sessionStorage.getItem('blogContentRaw');
+      const payload = { text }
+
+      fetch(`http://localhost:${PORT}/api/analyze`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+        .then(res => {
+          if (res.ok) return res.body.getReader().read();
+          else res.text().then(text => console.error(text))
+        })
+        .then(data => {
+          if (!data) return;
+          const bodyAsString = new TextDecoder('utf-8').decode(data.value);
+          const body = JSON.parse(bodyAsString);
+
+          rating = Math.round(body.data.controversy_rating * 100);
+          document.getElementById('blog-rating').innerText = `Rating: ${rating}%`
+          document.getElementById('post-button').disabled = false
+        })
+    }
+
+    const postBlog = () => {
+      const payload = {
+        blog: {
+          title,
+          content,
+          user_id: localStorage.getItem('userId'),
+          rating,
+        }
+      }
+      fetch(`http://localhost:${PORT}/api/blog`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+        .then(res => {
+          if (!res.ok) return res.text().then(text => console.error(text))
+            
+          sessionStorage.clear()
+          window.location.href = 'feed'
+        })
+    }
+
+    window.onload = () => {
+      setup();
+      getRating();
+    }
+  </script>
 </head>
 
 <body style="text-align: center;">
-	<h1 style="color:green;">
-		Blog Analysis
-	</h1>
+	<h1 style="color:green;">Blog Analysis</h1>
+  <h3 id="blog-rating" style="color:green;margin-bottom: 5em;">Rating: Loading...</h2>
 
-	<h3>
-		Blob text here
-	</h3>
-
-	<em title="Emphasized text">
-		Emphasized text content
-	</em>
+	<h3 id="blog-title" style="text-transform: capitalize;"></h3>
+  <iframe name="richTextField" style="width:80%;height: 600px;margin:auto;display: block;"></iframe>
+  <button id="post-button" disabled style="margin-top: 2em; width: 50px;">Post</button>
 </body>
 
 </html>
