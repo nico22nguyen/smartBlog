@@ -6,35 +6,39 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.9/css/all.css">
     <script>
       const PORT = 8000
-      const postBlog = () => {
+      if (!localStorage.getItem('userId')) window.location.href = '/login'
+
+      const advanceStep = () => {
         const title = document.getElementById('blogTitle').value;
-        const { innerHTML, innerText } = richTextField.document.body
-        console.log(innerHTML, innerText)
-        /*
-        fetch(`http://localhost:${PORT}/api/auth`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        })
-          .then(res => {
-            if (res.ok) return
-            else if (res.status === 401) return alert('Incorrect Password')
-            else if (res.status === 404) return alert(`An account is not registered under email: ${email}`)
-            else res.text().then(text => console.error(text))
-          })
-        */
+        const { innerHTML, innerText } = richTextField.document.body;
+
+        if (!title || !innerHTML || !innerText) {
+          alert('Please fill out all fields (title, content)');
+          return
+        }
+
+        // store blog info in session storage so that it can be accessed by the analysis page
+        sessionStorage.setItem('blogTitle', title);
+        sessionStorage.setItem('blogContent', innerHTML);
+        sessionStorage.setItem('blogContentRaw', innerText);
+
+        window.location.href = 'analysis';
       }
+
       window.onload = () => {
         enableEditMode()
         document.getElementById('next-button')
-          .addEventListener('click', postBlog);
+          .addEventListener('click', advanceStep);
       }
+
       function enableEditMode() {
         richTextField.document.designMode = "on";
       }
+
       function Edit(command) {
         richTextField.document.execCommand(command, false, null);
       }
+      
       function execVal(command, value) {
         richTextField.document.execCommand(command, false, value);
       }
