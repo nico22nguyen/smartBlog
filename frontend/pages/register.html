@@ -26,15 +26,21 @@
           body: JSON.stringify(payload),
         })
           .then(res => {
-            if (res.ok) {
-              window.location.href = 'feed';
-              return
-            }
+            if (res.ok) return res.body.getReader().read();
 
             res.text().then(text => {
               console.error(text)
               document.getElementById('error-box').innerText = text
             })
+          })
+          .then(data => {
+            if (!data) return;
+            const bodyAsString = new TextDecoder('utf-8').decode(data.value);
+            const body = JSON.parse(bodyAsString);
+
+            // log user in
+            const { id } = body.data;
+            localStorage.setItem('userId', id);
           })
           .catch(error => console.error(error));
       };
