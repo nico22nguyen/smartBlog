@@ -5,6 +5,14 @@ const HOST = 'localhost'
 const PORT = 3000
 const PAGES_DIR = __dirname + '/pages'
 
+const ROUTEMAP = {
+  '/feed': '/feed.html',
+  '/register': '/register.html',
+  '/login': '/login.html',
+  '/post': '/postblog.html',
+  '/analysis': '/analysis.html'
+}
+
 const redirectToFeed = (req, res) => {
   res.writeHead(302, { 'Location': '/feed' });
   res.end();
@@ -22,32 +30,11 @@ const serveStatic = (req, res) => {
     })
 }
 
-const serveFeed = (req, res) => {
-  fs.readFile(PAGES_DIR + "/feed.html")
-    .then(contents => {
-      res.writeHead(200);
-      res.end(contents);
-    })
-}
+const serveRoute = (req, res) => {
+  const route = ROUTEMAP[req.url]
+  if (!route) return serve404(req, res)
 
-const serveRegister = (req, res) => {
-  fs.readFile(PAGES_DIR + "/register.html")
-    .then(contents => {
-      res.writeHead(200);
-      res.end(contents);
-    })
-}
-
-const serveLogin = (req, res) => {
-  fs.readFile(PAGES_DIR + "/login.html")
-    .then(contents => {
-      res.writeHead(200);
-      res.end(contents);
-    })
-}
-
-const servePost = (req, res) => {
-  fs.readFile(PAGES_DIR + "/postblog.html")
+  fs.readFile(PAGES_DIR + route)
     .then(contents => {
       res.writeHead(200);
       res.end(contents);
@@ -64,30 +51,13 @@ const router = (req, res) => {
   res.setHeader("Content-Type", "text/html");
 
   // handle requests for static files
-  if (req.url.startsWith('/static')) {
-    return serveStatic(req, res)
-  }
+  if (req.url.startsWith('/static')) return serveStatic(req, res)
 
-  // handle routes
-  switch (req.url) {
-    case '/':
-      redirectToFeed(req, res);
-      break
-    case '/feed':
-      serveFeed(req, res)
-      break
-    case '/register':
-      serveRegister(req, res)
-      break
-    case '/login':
-      serveLogin(req, res)
-      break
-    case '/post':
-      servePost(req, res)
-      break
-    default:
-      serve404(req, res)
-  }
+  // redirect to feed if no route is specified
+  if (req.url === '/') return redirectToFeed(req, res)
+
+  // handle requests for routes
+  serveRoute(req, res)
 }
 
 const server = http.createServer(router)
