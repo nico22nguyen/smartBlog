@@ -10,7 +10,8 @@ const ROUTEMAP = {
   '/register': '/register.html',
   '/login': '/login.html',
   '/post': '/postblog.html',
-  '/analysis': '/analysis.html'
+  '/analysis': '/analysis.html',
+  '/singlepost': '/singlepost.html',
 }
 
 const redirectToFeed = (req, res) => {
@@ -31,7 +32,8 @@ const serveStatic = (req, res) => {
 }
 
 const serveRoute = (req, res) => {
-  const route = ROUTEMAP[req.url]
+  // remove query params
+  const route = ROUTEMAP[req.url.split('?')[0]]
   if (!route) return serve404(req, res)
 
   fs.readFile(PAGES_DIR + route)
