@@ -4,6 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script>
       const PORT = 8000
+      let ID
 
       const goToBlog = (e) => {
         e.preventDefault()
@@ -27,7 +28,7 @@
               <p>Author</p>
             </div>
             <div class="col-75">
-              <p class="author">${blog.user_id}</p>
+              <p class="author">${blog.user_id === ID ? 'You' : blog.user_id}</p>
             </div>
           </div>
           
@@ -65,11 +66,11 @@
 
       window.onload = () => {
         const authButton = document.getElementById('auth-button')
-        const isLoggedIn = !!localStorage.getItem('userId')
+        ID = localStorage.getItem('userId')
 
-        authButton.innerText = isLoggedIn ? 'Log out' : 'Log in'
+        authButton.innerText = ID ? 'Log out' : 'Log in'
         authButton.addEventListener('click', () => {
-          if (isLoggedIn) localStorage.removeItem('userId')
+          if (ID) localStorage.removeItem('userId')
           window.location.href = 'login'
         })
 
