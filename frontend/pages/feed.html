@@ -7,14 +7,14 @@
       let ID
 
       const goToBlog = (e) => {
-        e.preventDefault()
-        const blogId = event.target.id
-
-        window.location.href = `blog/${blogId}`
+        const blogId = e.currentTarget.id
+        window.location.href = `singlepost?id=${blogId}`
       }
 
-      const generatePostHTML = (blog) => `
-        <div class="container">
+      const generatePostHTML = (blog) => {
+        const htmlContent = blog.content
+        const textContent = htmlContent.replace(/<[^>]+>/g, '');
+        return `<div class="container">
           <div class="row">
             <div class="col-25">
               <p>Title</p>
@@ -37,16 +37,17 @@
               <p>Content</p>
             </div>
             <div class="col-75">
-              <p class="content">${blog.content.substring(0, 150)}</p>
+              <p class="content">${textContent.substring(0, 150)}</p>
             </div>
           </div>
           <div class="row">
-            <button id='${blog.id}'>
+            <button id='${blog.idblog}'>
               <img width='24px' height='24px' src ='../static/Right_Arrow_Red.webp'/>
             </button>
           </div>
-        </div>
-      `
+        </div>`
+      }
+
       const blogsPromise = fetch(`http://localhost:${PORT}/api/blog`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
@@ -75,11 +76,11 @@
         })
 
         blogsPromise.then(blogs => {
-          const blogHTML = blogs.map(generatePostHTML).join('')
+          const blogHTML = blogs.map(generatePostHTML).join('') 
           const blogContainer = document.getElementById('blog-container')
           document.getElementById('blog-container').innerHTML = blogHTML
           blogs.forEach(blog => {
-            document.getElementById(blog.id).addEventListener('click', goToBlog)
+            document.getElementById(blog.idblog).addEventListener('click', goToBlog, true)
           })
         });
       }
