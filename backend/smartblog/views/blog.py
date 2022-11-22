@@ -1,4 +1,5 @@
 import uuid
+import time
 from json import dumps
 
 from django.http import HttpResponse
@@ -122,18 +123,19 @@ def getBlogsWithConstraints(user_id, title, cgeq, cleq):
   cursor.close()
   return HttpResponse(dumps({ 'data': blogs }), content_type='application/json')
 
-# handle error for no such user, myql will throw one
+# handle error for no such user, mysql will throw one
 def createBlog(blog):
   cursor = connection.cursor()
 
-  if params_missing([blog['user_id'], blog['title'], blog['content'], blog['created_at'], blog['rating']]):
+  if params_missing([blog['user_id'], blog['title'], blog['content'], blog['rating']]):
     response = HttpResponse('User object incomplete: expected email, password, first_name, and last_name')
     response.status_code = 400
 
     return response
 
   id = uuid.uuid4().hex
-  query = f'INSERT INTO blog (idblog, user_id, title, content, created_at, rating) VALUES ("{id}", "{blog["user_id"]}", "{blog["title"]}", "{blog["content"]}", "{blog["created_at"]}", "{blog["rating"]}")'
+  created_at = time.strftime('%Y-%m-%d %H:%M:%S')
+  query = f'INSERT INTO blog (idblog, user_id, title, content, created_at, rating) VALUES ("{id}", "{blog["user_id"]}", "{blog["title"]}", \'{blog["content"]}\', "{created_at}", "{blog["rating"]}")'
 
   # need to handle email already taken
   cursor.execute(query)
