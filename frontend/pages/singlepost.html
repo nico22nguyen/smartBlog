@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Blog Analysis</title>
+  <script>
+    const PORT = 8000
+    const queryString = window.location.search
+    const urlParams = new URLSearchParams(queryString)
+    const id = urlParams.get('id')
+    
+    if (!id) window.location.href = 'feed'
+
+    const addBlogToDOM = (blog) => {
+      const { title, content, controversy_rating: rating, user_id } = blog
+      
+      document.getElementById('blog-rating').innerText = `Rating: ${rating}%`
+      document.getElementById('blog-title').innerText = title
+      document.getElementById('author').innerText = user_id
+      richTextField.document.body.innerHTML = content
+    }
+
+    const getBlog = () => {
+      fetch(`http://localhost:${PORT}/api/blog?bid=${id}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      })
+        .then(res => {
+          if (res.ok) return res.body.getReader().read();
+          if (res.status === 404) alert('Blog not found')
+          else res.text().then(text => console.error(text))
+        })
+        .then(data => {
+          if (!data) return;
+          const bodyAsString = new TextDecoder('utf-8').decode(data.value);
+          const body = JSON.parse(bodyAsString);
+
+          return body.data
+        })
+        .then(addBlogToDOM)
+    }
+    
+    window.onload = getBlog
+  </script>
+</head>
+
+<body style="text-align: center;">
+	<h1 id="blog-title" style="color:green;text-transform: capitalize;">Loading...</h1>
+  <h6 id="author"></h6>
+  <h3 id="blog-rating" style="color:green;margin-bottom: 5em;"></h2>
+  
+  <iframe name="richTextField" style="width:80%;height: 600px;margin:auto;display: block;"></iframe>
+</body>
+
+</html>
