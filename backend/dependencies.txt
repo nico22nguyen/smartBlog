@@ -1,4 +1,5 @@
 django
+mysqlclient
 djangorestframework
 django-cors-headers
 python-dotenv
