@@ -1,6 +1,11 @@
 <html>
   <head>
     <title>Register</title>
+    <style>
+      input {
+        margin-bottom: 1em;
+      }
+    </style>
     <script>
       const PORT = 8000
 
@@ -48,7 +53,7 @@
   </head>
   <body>
     <h1>Register</h1>
-    <form method="post" id="form">
+    <form method="post" id="form" style="display:flex;flex-direction:column;width:300px;">
       <label for="email">Email</label>
       <input type="email" name="email" id="email" required/>
       <label for="password">Password</label>
